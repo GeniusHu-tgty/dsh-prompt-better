@@ -1,0 +1,6 @@
+# dsh-prompt-better bundle layer：挂载 host 插件（EnhancePromptService）。
+# name 由 cordis-plugin-loader 从 config tree（profile cordis.yml 目录）解析为 npm 包名，
+# 该包必须出现在 profile 的 dependencies（本包作为 bundle 被引用时自动满足）。
+- insert:
+    - id: enhance-prompt
+      name: dsh-prompt-better

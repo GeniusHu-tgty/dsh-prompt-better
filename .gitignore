@@ -1,0 +1,26 @@
+# 依赖
+node_modules/
+
+# 构建中间产物
+tsc-out/
+.client-tmp/
+*.tsbuildinfo
+
+# 日志与临时文件
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# 编辑器 / 系统
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# 环境变量
+.env
+.env.*
+!.env.example
