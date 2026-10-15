@@ -3,7 +3,7 @@
   "displayName": "DSH Prompt Better",
   "version": "0.1.0",
   "description": "增强提示词：输入框一键 LLM 改写草稿，三态按钮 + 一键回退",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": "GeniusHu-tgty (https://github.com/GeniusHu-tgty)",
   "type": "module",
   "main": "./lib/index.js",

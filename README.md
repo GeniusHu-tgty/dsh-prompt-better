@@ -133,4 +133,4 @@ pnpm typecheck   # 类型检查
 
 ## License
 
-[MIT](./LICENSE)
+[Apache-2.0](./LICENSE)
