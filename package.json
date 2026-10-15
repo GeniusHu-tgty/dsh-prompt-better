@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "description": "增强提示词：输入框一键 LLM 改写草稿，三态按钮 + 一键回退",
   "license": "MIT",
+  "author": "GeniusHu-tgty (https://github.com/GeniusHu-tgty)",
   "type": "module",
   "main": "./lib/index.js",
   "exports": {
@@ -28,11 +29,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YuJunZhiXue/dsh-prompt-better.git"
+    "url": "git+https://github.com/GeniusHu-tgty/dsh-prompt-better.git"
   },
-  "homepage": "https://github.com/YuJunZhiXue/dsh-prompt-better#readme",
+  "homepage": "https://github.com/GeniusHu-tgty/dsh-prompt-better#readme",
   "bugs": {
-    "url": "https://github.com/YuJunZhiXue/dsh-prompt-better/issues"
+    "url": "https://github.com/GeniusHu-tgty/dsh-prompt-better/issues"
   },
   "scripts": {
     "build": "node scripts/build.mjs",
