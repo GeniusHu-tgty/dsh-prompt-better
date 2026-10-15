@@ -1,35 +1,46 @@
+<div align="center">
+
 # DSH Prompt Better
 
-[English](README.md) · [简体中文](README.zh-CN.md)
+### ✨ 一键把提示词说清楚
 
-**一键把提示词说清楚。** DSH Prompt Better 会在对话输入框旁添加一个 ✨ 按钮，把你的草稿改写得更清晰、具体；需要时也可以一键恢复原文。
+在输入框旁把简单想法扩写成清晰、具体的提示词。增强、取消或恢复原文，都不必离开当前对话。
 
-## 效果示例
+[![Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-4f7cff?style=flat-square)](LICENSE)
+![适用于 DSH](https://img.shields.io/badge/works%20with-DSH-111827?style=flat-square)
 
-从一句简单想法开始，得到一段更清晰、可以直接发送的提示词：
+[English](README.md) · **简体中文**
 
-**增强前**
+</div>
 
-![增强前：简单询问一个 GitHub 项目的用途](docs/images/prompt-before.png)
+## 从简单想法到清晰提示词
 
-**增强后**
+先写下一句简单的问题，再一键补充成更明确、可直接使用的请求。
 
-![增强后：补充了具体的项目分析和使用说明要求](docs/images/prompt-after.png)
+<table>
+<tr>
+<td align="center"><strong>增强前</strong></td>
+<td align="center"><strong>增强后</strong></td>
+</tr>
+<tr>
+<td><img src="docs/images/prompt-before.png" alt="简单询问 GitHub 项目的用途" width="480"></td>
+<td><img src="docs/images/prompt-after.png" alt="具体要求分析项目并提供使用说明" width="480"></td>
+</tr>
+</table>
 
-## 可以做什么
+## 一个按钮，三种状态
 
-- **增强**：点击一次，在原输入框中改写草稿。
-- **恢复**：一键恢复增强前的原文。
-- **取消**：增强进行中可以随时取消。
-- 保持草稿原有的语言。
-- 增强失败，或请求过程中草稿发生变化时，不会用结果覆盖你的内容。
-- 保留草稿中的文件引用 chip。
+| ✨ 增强 | <img src="docs/images/enhancing-spinner.gif" alt="动态加载动画" width="20"> 增强中 · 点击取消 | ↺ 恢复 |
+|:--|:--|:--|
+| 在原输入框中改写草稿。 | 动态转圈表示请求正在进行，点击即可取消。 | 增强完成后可随时恢复原文。 |
 
-## 使用哪个模型？
+改写会保留草稿原有的语言。请求失败，或增强过程中你继续编辑时，插件不会覆盖你的草稿；文件引用 chip 也会保留。
 
-默认使用点击 ✨ 时当前对话所选的模型。请求沿用 DSH 已配置的模型和服务商，插件不需要单独配置 API Key。如果当前对话没有可用的模型选择，则使用 DSH Host 的默认模型。
+## 自动使用当前 DSH 模型
 
-## 如何使用
+默认使用点击 ✨ 时当前对话选中的模型，并沿用 DSH 已配置的服务商和 API。**无需另配 API Key 或模型。** 如果当前对话没有模型选择，则使用 DSH Host 的默认模型。
+
+## 快速开始
 
 你需要先有可正常运行的 DSH 安装和 profile。
 
@@ -40,7 +51,7 @@
    pnpm build
    ```
 
-2. 在 profile 的 `package.json` 中添加本插件依赖及 bundle：
+2. 在 profile 的 `package.json` 中添加依赖和 bundle：
 
    ```json
    {
@@ -55,23 +66,27 @@
    }
    ```
 
-3. 重启 DSH。在对话输入框中写下草稿，点击旁边的 ✨ 即可增强；点击 ↺ 可恢复原文。
+3. 重启 DSH，在输入框写下草稿并点击旁边的 ✨。
 
-## 可选配置
+<details>
+<summary>可选：调整超时或固定模型</summary>
 
-日常使用无需配置。如果需要调整超时时间，或指定固定模型，可在 profile 的 `cordis.patch.yml` 中添加：
+在 profile 的 `cordis.patch.yml` 中添加以下配置即可；通常无需额外配置。
 
 ```yaml
 - id: enhance-prompt
   name: dsh-prompt-better
   config:
     timeoutMs: 120000
-    # 可选：固定使用某个模型，不再跟随当前对话的模型选择。
+    # 可选：固定模型，不再跟随当前对话的模型选择。
     # provider: deepseek-account
     # model: deepseek-flash
 ```
 
-## 开发
+</details>
+
+<details>
+<summary>开发</summary>
 
 ```bash
 pnpm install
@@ -79,6 +94,12 @@ pnpm build
 pnpm typecheck
 ```
 
-## 许可证
+</details>
 
-[Apache-2.0](./LICENSE)
+---
+
+<div align="center">
+
+[Apache-2.0 许可证](LICENSE) · [English](README.md)
+
+</div>
