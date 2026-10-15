@@ -1,136 +1,167 @@
-# dsh-prompt-better
+# DSH Prompt Better
 
-**DSH（DeepSeek Harness）插件：增强提示词** —— 输入框右侧 ✨ 一键把你的草稿交给 LLM 改写成更清晰、更具体的提示词。
+**Make your prompts clearer with one click.** DSH Prompt Better adds an ✨ button beside the chat input. It rewrites your draft into a clearer, more specific prompt—then lets you restore the original whenever you want.
 
-## 效果示例
+[English](#dsh-prompt-better) · [简体中文](#简体中文)
 
-输入一个简单的想法，点击 ✨ 增强后即可得到更清晰、具体、可直接使用的提示词：
+## See it in action
 
-**增强前**
+Start with a short idea; get a more useful prompt ready to send:
 
-![增强前：在输入框中输入 GitHub 项目链接并询问项目用途](docs/images/prompt-before.png)
+**Before**
 
-**增强后**
+![Before: a short question about a GitHub project](docs/images/prompt-before.png)
 
-![增强后：提示词补充了项目分析要求、核心功能和使用方法](docs/images/prompt-after.png)
+**After**
 
-## 功能
+![After: a clearer request with concrete analysis and usage details](docs/images/prompt-after.png)
 
-- ✨ **增强**：草稿文本 → 一次性 LLM 改写 → 原地替换
-- ↺ **恢复**：一键恢复增强前的原文
-- ⏳ **取消**：增强中随时取消（Host 侧 agent 同步回收）
-- 🌐 **语言保真**：中文输入 → 中文输出；混合语言保持混合；不输出"检测到中文"之类的元注释
-- 🛡 **CAS 防覆盖**：增强期间你继续打字 → 放弃覆盖，草稿分毫不动
-- 📎 **失败降级**：任何失败（超时/模型错误/网络）草稿原样保留，只弹提示
-- 🔗 **引用 chip 保护**：草稿含文件引用时按区间写入，附件不丢
+## What it does
 
-## 原理
+- **Enhance** a draft in place with one click.
+- **Restore** the original draft with one click.
+- **Cancel** an enhancement in progress.
+- Preserve the language of your draft.
+- Keep your draft unchanged if enhancement fails or you edit it while the request is running.
+- Preserve file-reference chips in the draft.
 
-Host 面创建一个 **one-shot scoped agent**（无工具、独立 system prompt、单轮跑完即弃），
-通过 Typert Remote 暴露给浏览器；Client 面在 `conversation.input.right` 插槽
-（发送键左侧，DSH 官方零占用位）渲染三态按钮。
+## Which model does it use?
 
-改写 prompt 由双 prompt 资产驱动：
-system prompt 管改写策略（分析→原则→负面约束→few-shot），
-user 模板管格式纪律（语言一致性 CRITICAL PRIORITY + BAD/GOOD 输出对比）。
+By default, enhancement uses the model currently selected for the conversation when you click ✨. Requests use your existing DSH model/provider setup; this plugin does not require a separate API key. If no conversation model is available, it falls back to the DSH host's default model.
 
-## 安装
+## Use it
 
-### 前置
+You need a working DSH installation and profile.
 
-- 一个可用的 dsh 安装与 profile（本插件按 profile bundles 模式挂载）
-
-### 方式一：profile 手动挂载
-
-1. 构建本包（零配置，依赖全部来自 npm）：
+1. Build the package:
 
    ```bash
    pnpm install
-   pnpm build   # 产物 lib/index.js (host) + lib/client.js (browser)
+   pnpm build
    ```
 
-   > 类型依赖锁定 `0.2.0-rc.2`（npm `next` tag，与当前 DSH 安装同版线）。
-   > npm 用户可用 `npm install` + `npm run build`（client 面依赖需 `--legacy-peer-deps`，推荐 pnpm）。
-
-2. 在 profile 的 `package.json` 中加入依赖与 bundle：
+2. Add the package to your profile's `package.json` and bundle list:
 
    ```json
    {
      "dependencies": {
-       "dsh-prompt-better": "link:<本包绝对路径>"
+       "dsh-prompt-better": "link:<absolute path to this package>"
      },
      "dsh": {
        "profile": {
-         "bundles": [ "...", "dsh-prompt-better" ]
+         "bundles": ["...", "dsh-prompt-better"]
        }
      }
    }
    ```
 
-3. 重启 dsh。输入框工具行（发送键左侧）出现 ✨ 按钮即成功。
+3. Restart DSH. Type a draft and click ✨ beside the chat input to enhance it. Click ↺ to restore the original.
 
-### 配置（可选）
+## Optional configuration
 
-在 profile 的 `cordis.patch.yml`（`config` 直接作为第二参数传入插件的 `apply`）：
+Add this entry to your profile's `cordis.patch.yml` if you want to change the timeout or pin a specific model. In normal use, no configuration is needed.
 
 ```yaml
 - id: enhance-prompt
   name: dsh-prompt-better
   config:
-    followSessionModel: true   # 默认：跟随右侧模型选择器的当前选择
-    timeoutMs: 120000          # 单次增强超时（毫秒）
-    # 以下两项仅在需要“钉死”模型时才配（配置后不再跟随会话座位）
+    timeoutMs: 120000
+    # Optional: pin a model instead of following the conversation selection.
     # provider: deepseek-account
     # model: deepseek-flash
 ```
 
-### 模型解析（默认跟随右侧座位）
-
-增强调用哪个模型，按以下优先级解析：
-
-1. **插件配置显式钉住**（`provider` / `model`）—— 仅当部署方主动配置时生效；
-2. **当前会话在模型选择器里选中的模型** —— 默认行为（`followSessionModel: true`）；
-3. **Host 默认模型**（`agentDefaultModel.currentSelection()`）—— 兜底。
-
-第 2 项由 client 半在点击瞬间从 `ctx.modelDirectories.directoryFor(sessionId).store.getSnapshot().current` 读取（即右侧座位显示的那个 provider/model/reasoningEffort），随请求体 `{ text, selection }` 传给 Host。它来自 Host 的 `modelSelection` 会话投影，因此与界面显示严格一致 —— 切换即时生效，无需重启。
-
-> 为什么不直接用 `agentDefaultModel.currentSelection()`：它读的是 profile 里 `agent-default-model` 条目的**静态配置**（`config.provider.get()` / `config.model.get()`），与用户在右侧选了什么无关 —— 这正是"模型被写死"的来源。
-
-> 实现说明：本插件**刻意不导出 `Config`**。cordis 的 fiber 会对 `plugin.Config` 调用
-> `Config["~standard"].validate(config)`，只有 schemastery schema 才有该字段；导出普通对象会
-> 直接抛 `TypeError: Cannot read properties of undefined (reading 'validate')` 并让 fiber 无法激活。
-
-## 位置与形态
-
-- `conversation.input.right` 插槽（官方零占用），28px 图标钮，空草稿不渲染（零占位）
-- `order: 20` 与其他插件按序共存，不重叠不挤压
-- 三态一按钮：✨ 增强 → 转圈（点击=取消）→ ↺ 恢复原文
-
-## 目录
-
-```
-src/prompts.ts          # 双 prompt 资产（系统策略 + 用户模板）
-src/index.ts            # Host：EnhancePromptService（one-shot scoped agent）
-src/client/index.tsx    # Client：slot 注册 + 状态机 + CAS 写回 + Revert
-src/client/store.ts     # 会话级状态机
-src/client/service.ts   # Typert Remote 贡献（手写 InvocationDescriptor）
-src/client/spans.ts     # 草稿区间计算（引用 chip 保护）
-src/client/styles.ts    # 样式注入（按钮 + 加载转圈）
-scripts/build.mjs       # 两段式构建（tsc emit → esbuild bundle）
-```
-
-## 开发
+## Development
 
 ```bash
 pnpm install
-pnpm build       # 构建
-pnpm typecheck   # 类型检查
+pnpm build
+pnpm typecheck
 ```
 
-## 致谢
-
-- [morluto/rea](https://github.com/morluto/rea)（REA）—— 本项目的逆向分析工具
-
 ## License
+
+[Apache-2.0](./LICENSE)
+
+## 简体中文
+
+**一键把提示词说清楚。** DSH Prompt Better 会在对话输入框旁添加一个 ✨ 按钮，把你的草稿改写得更清晰、具体；需要时也可以一键恢复原文。
+
+### 效果示例
+
+从一句简单想法开始，得到一段更清晰、可以直接发送的提示词：
+
+**增强前**
+
+![增强前：简单询问一个 GitHub 项目的用途](docs/images/prompt-before.png)
+
+**增强后**
+
+![增强后：补充了具体的项目分析和使用说明要求](docs/images/prompt-after.png)
+
+### 可以做什么
+
+- **增强**：点击一次，在原输入框中改写草稿。
+- **恢复**：一键恢复增强前的原文。
+- **取消**：增强进行中可以随时取消。
+- 保持草稿原有的语言。
+- 增强失败，或请求过程中草稿发生变化时，不会用结果覆盖你的内容。
+- 保留草稿中的文件引用 chip。
+
+### 使用哪个模型？
+
+默认使用点击 ✨ 时当前对话所选的模型。请求沿用 DSH 已配置的模型和服务商，插件不需要单独配置 API Key。如果当前对话没有可用的模型选择，则使用 DSH Host 的默认模型。
+
+### 如何使用
+
+你需要先有可正常运行的 DSH 安装和 profile。
+
+1. 构建插件：
+
+   ```bash
+   pnpm install
+   pnpm build
+   ```
+
+2. 在 profile 的 `package.json` 中添加本插件依赖及 bundle：
+
+   ```json
+   {
+     "dependencies": {
+       "dsh-prompt-better": "link:<本插件的绝对路径>"
+     },
+     "dsh": {
+       "profile": {
+         "bundles": ["...", "dsh-prompt-better"]
+       }
+     }
+   }
+   ```
+
+3. 重启 DSH。在对话输入框中写下草稿，点击旁边的 ✨ 即可增强；点击 ↺ 可恢复原文。
+
+### 可选配置
+
+日常使用无需配置。如果需要调整超时时间，或指定固定模型，可在 profile 的 `cordis.patch.yml` 中添加：
+
+```yaml
+- id: enhance-prompt
+  name: dsh-prompt-better
+  config:
+    timeoutMs: 120000
+    # 可选：固定使用某个模型，不再跟随当前对话的模型选择。
+    # provider: deepseek-account
+    # model: deepseek-flash
+```
+
+### 开发
+
+```bash
+pnpm install
+pnpm build
+pnpm typecheck
+```
+
+### 许可证
 
 [Apache-2.0](./LICENSE)
